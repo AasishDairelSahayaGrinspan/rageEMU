@@ -17,7 +17,7 @@ It's basically the same source as the web port.
 Muguet itself will then asks for that zip
 
 ## Requirements
-- Apple Silicon Mac, macOS 14 or later
+- Mac on macOS 14 or later (Apple Silicon recommended; Intel i7+ with 16GB+ RAM works as build host in this fork)
 - Rust toolchain
 - Xcode 26 or later
 

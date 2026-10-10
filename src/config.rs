@@ -31,7 +31,7 @@ fn support_dir() -> PathBuf {
     if cfg!(target_os = "ios") {
         return PathBuf::from(home).join("Documents");
     }
-    PathBuf::from(home).join("Library/Application Support/Muguet")
+    PathBuf::from(home).join("Library/Application Support/rageEMU")
 }
 
 pub fn game_dir() -> PathBuf {
@@ -73,7 +73,7 @@ fn redirect_logs_if_detached() {
         return;
     }
     let home = std::env::var("HOME").unwrap_or_else(|_| "/tmp".into());
-    let path = PathBuf::from(home).join("Library/Logs/Muguet.log");
+    let path = PathBuf::from(home).join("Library/Logs/rageEMU.log");
     if let Ok(f) = std::fs::File::create(&path) {
         use std::os::fd::IntoRawFd;
         let fd = f.into_raw_fd();

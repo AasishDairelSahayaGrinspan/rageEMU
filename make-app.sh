@@ -4,7 +4,7 @@
 
 set -eu
 cd "$(dirname "$0")"
-APP="$PWD/build/Muguet.app"
+APP="$PWD/build/rageEMU.app"
 GAME="${1:-}"
 export RUSTFLAGS="${RUSTFLAGS:-} --remap-path-prefix=$HOME=/home --remap-path-prefix=$PWD=/muguet"
 
@@ -29,8 +29,12 @@ fi
 
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
-cp "$BIN" target/release/muguet-server "$APP/Contents/MacOS/"
-swiftc -O -parse-as-library -target arm64-apple-macos14 launcher/Launcher.swift -o "$APP/Contents/MacOS/Launcher"
+cp "$BIN" "$APP/Contents/MacOS/rageemu"
+cp target/release/muguet-server "$APP/Contents/MacOS/rageemu-server"
+# Intel migration: build Launcher for the host arch instead of arm64-only.
+HOST_ARCH="$(uname -m)"
+if [ "$HOST_ARCH" = "arm64" ]; then SWIFT_TARGET="arm64-apple-macos14"; else SWIFT_TARGET="x86_64-apple-macos14"; fi
+swiftc -O -parse-as-library -target "$SWIFT_TARGET" launcher/Launcher.swift -o "$APP/Contents/MacOS/Launcher"
 cp assets/*.mp3 "$APP/Contents/Resources/"
 
 xcrun actool assets/muguet.icon --compile "$APP/Contents/Resources" --app-icon muguet --platform macosx \
@@ -41,9 +45,9 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-  <key>CFBundleName</key><string>Muguet</string>
-  <key>CFBundleDisplayName</key><string>Muguet</string>
-  <key>CFBundleIdentifier</key><string>ch.cclerc.muguet</string>
+  <key>CFBundleName</key><string>rageEMU</string>
+  <key>CFBundleDisplayName</key><string>rageEMU</string>
+  <key>CFBundleIdentifier</key><string>com.rageemu.game</string>
   <key>CFBundleExecutable</key><string>Launcher</string>
   <key>CFBundleIconFile</key><string>muguet</string>
   <key>CFBundleIconName</key><string>muguet</string>
@@ -56,7 +60,7 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
   <key>NSLocalNetworkUsageDescription</key><string>Multiplayer connects to a game server on your local network.</string>
   <key>NSHighResolutionCapable</key><true/>
   <key>NSSupportsAutomaticGraphicsSwitching</key><false/>
-  <key>MuguetEmbeddedCode</key><EMBEDDED/>
+  <key>rageEMUEmbeddedCode</key><EMBEDDED/>
 </dict>
 </plist>
 PLIST

@@ -26,7 +26,7 @@ wasm-encoder = { version = "0.258.3", optional = true, features = ["wasmparser"]
 
 [features]
 default = ["jit"]
-jit = ["wasmtime/cranelift", "wasmtime/parallel-compilation", "dep:wasmparser", "dep:wasm-encoder"]
+jit = ["wasmtime/cranelift", "wasmtime/parallel-compilation", "wasmtime/all-arch", "dep:wasmparser", "dep:wasm-encoder"]
 
 [profile.release]
 opt-level = 2

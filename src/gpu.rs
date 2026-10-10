@@ -732,7 +732,27 @@ impl Gpu {
             compatible_surface: surface.as_ref().map(|s| &s.0),
             force_fallback_adapter: false,
             apply_limit_buckets: false,
-        }))?;
+        }))
+        // Intel migration: Intel iGPUs often have no HighPerformance Metal adapter.
+        // Fall back to LowPower, then to the fallback adapter, before failing.
+        .or_else(|_| {
+            log("no HighPerformance adapter, trying LowPower (Intel iGPU)");
+            pollster::block_on(instance.request_adapter(&RequestAdapterOptions {
+                power_preference: PowerPreference::LowPower,
+                compatible_surface: surface.as_ref().map(|s| &s.0),
+                force_fallback_adapter: false,
+                apply_limit_buckets: false,
+            }))
+        })
+        .or_else(|_| {
+            log("no hardware adapter, trying fallback adapter");
+            pollster::block_on(instance.request_adapter(&RequestAdapterOptions {
+                power_preference: PowerPreference::LowPower,
+                compatible_surface: surface.as_ref().map(|s| &s.0),
+                force_fallback_adapter: true,
+                apply_limit_buckets: false,
+            }))
+        })?;
         let want = Features::TEXTURE_COMPRESSION_BC | Features::TEXTURE_COMPRESSION_BC_SLICED_3D | Features::DEPTH32FLOAT_STENCIL8
             | Features::FLOAT32_FILTERABLE | Features::INDIRECT_FIRST_INSTANCE | Features::RG11B10UFLOAT_RENDERABLE
             | Features::BGRA8UNORM_STORAGE | Features::DEPTH_CLIP_CONTROL | Features::CLIP_DISTANCES | Features::DUAL_SOURCE_BLENDING

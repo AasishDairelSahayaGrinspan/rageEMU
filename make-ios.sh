@@ -27,7 +27,12 @@ if [ "${FREE:-0}" = 1 ] || [ "$MODE" = "--ipa" ]; then
 fi
 export MUGUET_IOS_HEAP_GB="${MUGUET_IOS_HEAP_GB:-$HEAP_GB}"
 TOOLCHAIN=1.98.1
-export PATH="/opt/homebrew/opt/rustup/bin:$PATH"
+# Intel migration: ARM Homebrew lives in /opt/homebrew, Intel in /usr/local.
+# Prefer existing rustup on PATH, then each known location, then $HOME/.cargo.
+if command -v rustup >/dev/null 2>&1; then :;
+elif [ -x "/opt/homebrew/opt/rustup/bin/rustup" ]; then export PATH="/opt/homebrew/opt/rustup/bin:$PATH";
+elif [ -x "/usr/local/opt/rustup/bin/rustup" ]; then export PATH="/usr/local/opt/rustup/bin:$PATH";
+elif [ -d "$HOME/.cargo/bin" ]; then export PATH="$HOME/.cargo/bin:$PATH"; fi
 export RUSTFLAGS="${RUSTFLAGS:-} --remap-path-prefix=$HOME=/home --remap-path-prefix=$PWD=/muguet"
 
 if [ -n "$ZIP" ]; then
