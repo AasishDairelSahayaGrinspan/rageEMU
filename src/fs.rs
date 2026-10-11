@@ -233,7 +233,20 @@ pub fn handle(name: &str, mem: &SharedMemory, p: &[Val], results: &mut [Val]) ->
         }
         "__syscall_fcntl64" => if a(0) <= 2 || fs.fds.contains_key(&a(0)) { 0 } else { -EBADF },
         "__syscall_ioctl" => -ENOTTY,
-        "__syscall_statfs64" => { write_bytes(mem, a(2) as u64, &[0u8; 88]); 0 }
+        // Report ample free space (wasm32 musl layout: u32 f_bsize@4, u64
+        // f_blocks@8/f_bfree@16/f_bavail@24/f_files@32/f_ffree@40, u32 f_frsize@60).
+        // The old zeroed struct made the game believe the disk was full
+        // ("You need an extra N KB to save the game").
+        "__syscall_statfs64" => {
+            let mut st = [0u8; 88];
+            st[4..8].copy_from_slice(&4096u32.to_le_bytes());
+            for off in [8usize, 16, 24, 32, 40] {
+                st[off..off + 8].copy_from_slice(&0x1000_0000u64.to_le_bytes());
+            }
+            st[60..64].copy_from_slice(&4096u32.to_le_bytes());
+            write_bytes(mem, a(2) as u64, &st);
+            0
+        }
 
         "__syscall_socket" | "__syscall_connect" | "__syscall_accept4" | "__syscall_sendto"
         | "__syscall_recvfrom" | "__syscall_setsockopt" | "__syscall_getsockopt"
