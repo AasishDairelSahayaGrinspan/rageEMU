@@ -134,7 +134,7 @@ fn main() -> Result<()> {
         Ok(s) => s,
         Err(e) => {
             eprintln!("[config] {e:#}");
-            alert("rageEMU", &format!("{e:#}"));
+            alert("Muguet", &format!("{e:#}"));
             std::process::exit(1);
         }
     };

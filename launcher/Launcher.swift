@@ -5,16 +5,16 @@ import AppKit
 import SwiftUI
 import UniformTypeIdentifiers
 
-let supportURL = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support/rageEMU")
+let supportURL = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support/Muguet")
 let configURL = supportURL.appendingPathComponent("config.json")
 let gameURL = supportURL.appendingPathComponent("game")
-let gameBinary = Bundle.main.bundleURL.appendingPathComponent("Contents/MacOS/rageemu")
+let gameBinary = Bundle.main.bundleURL.appendingPathComponent("Contents/MacOS/muguet")
 
 func gameReady() -> Bool {
     let fm = FileManager.default
     guard fm.fileExists(atPath: gameURL.appendingPathComponent("data/manifest.json").path),
           let builds = try? fm.contentsOfDirectory(at: gameURL.appendingPathComponent("b"), includingPropertiesForKeys: nil) else { return false }
-    let embedded = Bundle.main.object(forInfoDictionaryKey: "rageEMUEmbeddedCode") as? Bool ?? false
+    let embedded = Bundle.main.object(forInfoDictionaryKey: "MuguetEmbeddedCode") as? Bool ?? false
     return builds.contains { (embedded || fm.fileExists(atPath: $0.appendingPathComponent("game.wasm").path)) && fm.fileExists(atPath: $0.appendingPathComponent("shaders/index.json").path) }
 }
 
@@ -241,9 +241,9 @@ func localIPs() -> [String] {
 }
 
 @main
-struct rageEMULauncher: App {
+struct MuguetLauncher: App {
     var body: some Scene {
-        WindowGroup("rageEMU") { LauncherView() }
+        WindowGroup("Muguet") { LauncherView() }
             .windowResizability(.contentSize)
     }
 }
